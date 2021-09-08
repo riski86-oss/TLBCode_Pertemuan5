@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/screen/home_page.dart';
@@ -12,10 +13,20 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
+  final _auth = FirebaseAuth.instance;
+
   bool _isPasswordHide = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   
+  _loginWithEmail() async{
+    await _auth.signInWithEmailAndPassword(
+      email: _emailController.text,
+      password: _passwordController.text);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
+  }
+
   @override
   Widget build(BuildContext context) {
     
@@ -23,8 +34,8 @@ class _LoginPageState extends State<LoginPage> {
       controller: _emailController,
       style: const TextStyle(color: Colors.white),
       cursorColor: Colors.white,
-      validator: (String? value){
-        if(value == null){
+      validator: (value){
+        if(value == null || value.isEmpty){
           return 'Email tidak boleh kosong';
         }
       },
@@ -48,8 +59,8 @@ class _LoginPageState extends State<LoginPage> {
       controller: _passwordController,
       style: const TextStyle(color: Colors.white),
       cursorColor: Colors.white,
-      validator: (String? value){
-        if(value == null){
+      validator: (value){
+        if(value == null || value.isEmpty){
           return 'Password tidak boleh kosong';
         }
       },
@@ -82,7 +93,11 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     final _loginButton = ElevatedButton(
-      onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage())),
+      onPressed: (){
+        if(_formKey.currentState!.validate()){
+          _loginWithEmail();
+        }
+      },
       style: ElevatedButton.styleFrom(
         primary: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 15)
@@ -96,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         padding: const EdgeInsets.all(40.0),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

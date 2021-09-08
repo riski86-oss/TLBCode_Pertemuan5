@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/screen/login_page.dart';
 
@@ -9,10 +10,28 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+
+  final _auth = FirebaseAuth.instance;
+
   bool _isPasswordHide = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  _register() async{
+    try{
+      await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text);
+      
+      Navigator.pushReplacement(context, MaterialPageRoute(
+        builder: (context) => const LoginPage()
+      ));
+    }catch(e){
+      debugPrint(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +39,8 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: _nameController,
       style: const TextStyle(color: Colors.white),
       cursorColor: Colors.white,
-      validator: (String? value){
-        if(value == null){
+      validator: (value){
+        if(value == null || value.isEmpty){
           return 'Nama tidak boleh kosong';
         }
       },
@@ -44,8 +63,8 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: _emailController,
       style: const TextStyle(color: Colors.white),
       cursorColor: Colors.white,
-      validator: (String? value){
-        if(value == null){
+      validator: (value){
+        if(value == null || value.isEmpty){
           return 'Email tidak boleh kosong';
         }
       },
@@ -69,8 +88,8 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: _passwordController,
       style: const TextStyle(color: Colors.white),
       cursorColor: Colors.white,
-      validator: (String? value){
-        if(value == null){
+      validator: (value){
+        if(value == null || value.isEmpty){
           return 'Password tidak boleh kosong';
         }
       },
@@ -103,7 +122,11 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     final _registerButton = ElevatedButton(
-      onPressed: (){},
+      onPressed: (){
+        if(_formKey.currentState!.validate()){
+          _register();
+        }
+      },
       style: ElevatedButton.styleFrom(
         primary: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 15)
@@ -116,6 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Container(
         padding: const EdgeInsets.all(40.0),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
